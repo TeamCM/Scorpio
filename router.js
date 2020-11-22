@@ -2,9 +2,16 @@
 const router = require("express").Router();
 const request = require("request");
 const {MongoClient} = require("mongodb");
+const path = require("path");
+const createDOMPurify = require("dompurify");
+const { JSDOM } = require('jsdom');
 
 //Carrega todas as chaves secretas
 const secretKeys = require("./secretKeys.json");
+
+//Cria o DOMPurify
+const window = new JSDOM("").window;
+const DOMPurify = createDOMPurify(window);
 
 //Cria uma conexão com o servidor do scorpio de logins e servidores
 const client = new MongoClient(secretKeys.mongodb.url, {useNewUrlParser: true,useUnifiedTopology: true});
@@ -20,7 +27,18 @@ let name = "Scorpio";
 
 //Renderiza todas as paginas passando o nome do projeto
 router.get("/", (req, res) => {
+  res.header({"Cache-Control": "no-cache, no-store, must-revalidate"});
   res.render("index", {title: name});
+});
+
+router.get("/purify.min.js", (req, res) => {
+  res.header({"Content-Type": "application/javascript"});
+  res.sendFile(path.join(__dirname, "purify.min.js"));
+});
+
+router.get("/", (req, res) => {
+  res.header({"Content-Type": "application/javascript"});
+  res.sendFile(path.join(__dirname, "purify.min.js.map"));
 });
 
 router.get("/app", (req, res) => {
@@ -143,26 +161,37 @@ router.post("/api/v1/guild", (req, res) => {
 
   if(req.body.type == "create"){
     if(!req.body.guildname) return res.status(400).json({message: "Need guildname"});
-    let id = Math.floor(Math.random() * (9999999999999999 - 1000000000000000 + 1) + 1000000000000000);
+    let id = Date.now();
     logins.findOne({token: req.body.token}, function(err, item){
-      guilds.insertOne({id: id, name: req.body.guildname});
+      if(!item.token) return res.status(400).json({message: "Account not found"});
+      guilds.insertOne({id: id, name: req.body.guildname, owner: {
+        username: item.username,
+        descriminator: item.descriminator,
+        id: item.id
+      }, invites: [
+
+      ], members: {
+
+      }});
       console.log(logins);
       return res.status(201).send();
     });
   }
   if(req.body.type == "delete"){
+    if(!req.body.guildid) return res.status(400).json({message: "Need guildid"});
     logins.findOne({token: req.body.token}, function(err, item){
-      
+      if(!item.token) return res.status(400).json({message: "Account not found"});
+      guilds.deleteOne({id: req.body.guildid});
     });
   }
   if(req.body.type == "join"){
     logins.findOne({token: req.body.token}, function(err, item){
-      
+      if(!item.token) return res.status(400).json({message: "Account not found"});
     });
   }
   if(req.body.type == "leave"){
     logins.findOne({token: req.body.token}, function(err, item){
-      
+      if(!item.token) return res.status(400).json({message: "Account not found"});
     });
   }
 });
@@ -187,10 +216,17 @@ global.io.on("connection", socket => {
       if(details.token == secretKeys.owner.token && details.message == "!reiniciar") {socket.broadcast.emit("refresh");return socket.emit("refresh");}
       if(details.token == secretKeys.owner.token && details.message.includes("!mandar")) {let args = details.message.split(" ");socket.broadcast.emit("messageCreate",{message: args.slice(1).join(" "), author: "[Servidor]"});return socket.emit("messageCreate",{message: args.slice(1).join(" "), author: "[Servidor]"});}
 
+      const sanitize = DOMPurify.sanitize(details.message);
+
+      let thisDate = new Date();
       let details1 = {
-        message: details.message,
-        author: item.username
+        message: sanitize,
+        author: item.username,
+        timestampH: thisDate.getHours(),
+        timestampM: thisDate.getMinutes()
       }
+
+      if(!details1.message) return socket.emit("error", "Cannot send a empty message");
 
       socket.emit("messageCreate", details1);
       socket.broadcast.emit("messageCreate", details1);

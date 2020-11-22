@@ -9,7 +9,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(window).on("load", function(){
-            $("#preloader").fadeOut("fast");
+            $("#preloader").fadeOut("slow");
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
@@ -63,8 +63,7 @@
 
                 </div>
             </form>
-        <input id="messagetext" type="text" name="message">
-        <!--<button id="submitBtn">Enviar</button>-->
+        <input id="messagetext" autocomplete="off" type="text" name="message">
         </div>
         <h4 style="height:1%;width: 16%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;"><%=title%> Pre Alpha 0.2</h4>
     </div>
@@ -76,25 +75,22 @@
         let clickedTimes = 0;
         let logout;
         let debug = 0;
-
-        /*let loginmode = $("#loginmode").dataset.loginmode;
-        if(loginmode == 0) login();
-        else if(loginmode == 1) register();
-        //if(window.localStorage.token) window.location.href="/app";
-        function login(){
-            if($(".app-mount-login").style.opacity == "0") {$(".app-mount-login").style.opacity="1";$("#app").style.opacity="0";}
-        //*/
+        function addZero(i) {
+            if (i < 10) {
+                i = "0" + i;
+            }
+            return i;
+        }
+        let regex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
         let loginmode = $("#loginmode").data("loginmode");
         if(!loginmode) login();
         if(loginmode == 1) register();
         if(loginmode == 2) app();
-        //if(window.localStorage.token) window.location.href="/app";
         function login(){
-            if(window.localStorage.token) return app();
             if($(".app-mount-login").css("opacity") == "0") {$(".app-mount-login").css("opacity", "1");}
             if($(".app-mount-register").css("opacity") == "1") {$(".app-mount-register").css("opacity", "0");}
-            if($(".app-mount-app").css("opacity") == "1") {$(".app-mount-app").css("opacity", "0");}
-
+            if($("#app").css("opacity") == "1") {$("#app").css("opacity", "0");}
+            if(window.localStorage.token) return app();
             window.history.pushState({}, "", "login");
             if(typeof socket !== "undefined") {if(socket.disconnect){socket.disconnect();}socket = undefined;delete socket;}
             if(typeof logout !== "undefined") {logout = undefined;delete logout;}
@@ -140,21 +136,17 @@
         }
         function register(){
             if(window.localStorage.token) return app();
-            //if($("#app").style.opacity == "0") {$("#app").style.opacity="1";$(".app-mount-login").style.opacity="0";}
-            //if($("#app").css("opacity") == "0") {$("#app").css("opacity", "1");$(".app-mount-login").css("opacity", "0");}
             if($(".app-mount-register").css("opacity") == "0"){$(".app-mount-register").css("opacity", "1");}
             if($(".app-mount-login").css("opacity") == "1"){$(".app-mount-login").css("opacity", "0");}
             if($(".app-mount-app").css("opacity") == "1") {$(".app-mount-app").css("opacity", "0");}
             if(typeof socket !== "undefined") {if(socket.disconnect){socket.disconnect();}socket = undefined;delete socket;}
             if(typeof logout !== "undefined") {logout = undefined;delete logout;}
             window.history.pushState({}, "", "register");
-            if(typeof socket !== "undefined") {socket.disconnect();delete socket;}
             superagent.get("/recaptchasitekey").end(function(err, res){
                 if(createdGoogleRecaptcha == 0){
                     let element = document.createElement("div");
                     element.className = "g-recaptcha";
                     element.dataset.sitekey = res.text;
-                    //$("#register").appendChild(element);
                     $("#register").append(element);
                     let googleScript = document.createElement("script");
                     googleScript.src="https://www.google.com/recaptcha/api.js";
@@ -200,20 +192,19 @@
     }
     function app(){
         if($(".app-mount-login").css("opacity") == "1") {$(".app-mount-login").css("opacity", "0");$("#app").css("opacity", "0");}
-        if($("#app").css("opacity") == "1") {$("#app").css("opacity", "0");$("#app").css("opacity", "0");}
+        if($(".app-mount-register").css("opacity") == "1") {$(".app-mount-register").css("opacity", "0");}
         if($("#app").css("opacity") == "0") {$("#app").css("opacity", "1");}
+        logout = function(){
+            $("#app").css("opacity", "0");
+            window.localStorage.clear();
+            return login();
+        }
         window.history.pushState({}, "", "app");
         if(!window.localStorage.token) return login();
         superagent.post("/api/v1/banned").send({token: window.localStorage.token}).end(function(err, res){
             if(res.statusCode == 404){window.localStorage.clear();return login();}
             if(JSON.parse(res.text).banned == true){window.localStorage.clear(); return login();}
         });
-
-        logout = function(){
-            $("#app").css("opacity", "0");
-            window.localStorage.clear();
-            return login();
-        }
 
         if(!window.localStorage.token) login();
 
@@ -228,14 +219,17 @@
         socket.on("messageCreate", messageObj => {
             if(debug == 1) console.log(messageObj);
             let messageDoc = document.createElement("p");
+            /*let message = DOMPurify.sanitize(messageObj.message);*/
+            let arrMessage = messageObj.message.split(" ");
+            for(let i=0; i<arrMessage.length; i++){
+                let thisLocation = window.location.href;
+                if(arrMessage[i].match(regex)){arrMessage[i] = `<a onclick="window.open('${arrMessage[i]}');" href="#">${arrMessage[i]}</a>`}
+            }
+            messageObj.message = arrMessage.join(" ");
             messageDoc.innerHTML = `${messageObj.author}: ${messageObj.message}`;
             $("#messages").append(messageDoc);
             window.scrollTo(0,999999999);
         });
-
-        /*($("#submitBtn").onclick = function(){
-            $("#messages").append(messageDoc);
-        });//*/
 
         function sendMessage(){
             let message = $("input[name=\"message\"]").val();
@@ -248,12 +242,6 @@
             $("input[name=\"message\"]").val("");
             socket.emit("messageForServer", {token: token, message: message});
         }
-
-        /*$("#submitBtn").on("click", function(e){
-            e.preventDefault();
-
-            sendMessage();
-        });*/
 
         window.addEventListener("keydown", (e) => {
             if(e.key == "Enter") sendMessage();

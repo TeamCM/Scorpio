@@ -12,8 +12,10 @@
     "test": "node ."
   },
   "dependencies": {
+    "dompurify": "^2.2.2",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "jsdom": "^16.4.0",
     "mongodb": "^3.6.3",
     "request": "^2.88.2",
     "skeleton-screen-css": "^1.0.1",
