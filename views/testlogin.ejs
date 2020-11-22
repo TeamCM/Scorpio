@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title%></title>
+    <link rel="stylesheet" href="index.css">
+    <meta charset="utf-8">
+    <meta name="description" content="A community version of Discord">
+    <meta name="author" content="TeamCM">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(window).on("load", function(){
+            $("#preloader").fadeOut("fast");
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg==" crossorigin="anonymous"></script>
+    <script src="jquery-ui.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta property="og:image" content="/favicon.ico">
+  </head>
+  <body>
+    <svg class="waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#2e2e38" fill-opacity="1" d="M0,64L80,74.7C160,85,320,107,480,101.3C640,96,800,64,960,58.7C1120,53,1280,75,1360,85.3L1440,96L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path></svg>    </div>
+    
+    <div class="app-mount-login">
+        <form>
+            <input type="email" name="email">
+            <input type="password" name="password">
+            <button id="loginbtn">Logar</button>
+            <a href="#" onclick="register()">Não tem uma conta? Registrar-se</a>
+        </form>
+    </div>
+    <div style="opacity: 0;" class="app-mount-register">
+        <form id="register">
+            <input type="text" name="username">
+            <input type="email" name="emaill">
+            <input type="password" name="passwordl">
+            <button id="registerbtn">Registrar-se</button>
+            <a href="#" onclick="login()">Tem uma conta? Clique aqui</a>
+        </form>
+    </div>
+    <div style="opacity: 0;" id="app">
+        <div id="preloader" style="transform: translate(50%,50%);"><img id="preloading" style="width: 30%; height: 30%; transform: translate(140%, 20%); position: static; " alt="" src="logo.svg"><p id="preloading">Carregando...</p></div>
+        <div id="app-mount-app">
+            <form id="chat">
+                <div id="messages">
+
+                </div>
+            </form>
+        <input id="messagetext" type="text" name="message">
+        <!--<button id="submitBtn">Enviar</button>-->
+        </div>
+        <h4 style="height:1%;width: 16%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;"><%=title%> Pre Alpha 0.2</h4>
+    </div>
+    <div id="loginmode" style="height: 0%; width: 0%; opacity: 0;" data-loginmode=<%= loginmode%>></div>
+    <script>
+        let socket;
+        let errorRequestClickRegister = 0;
+        let createdGoogleRecaptcha = 0;
+        let clickedTimes = 0;
+        let logout;
+        let debug = 0;
+
+        /*let loginmode = $("#loginmode").dataset.loginmode;
+        if(loginmode == 0) login();
+        else if(loginmode == 1) register();
+        //if(window.localStorage.token) window.location.href="/app";
+        function login(){
+            if($(".app-mount-login").style.opacity == "0") {$(".app-mount-login").style.opacity="1";$("#app").style.opacity="0";}
+        //*/
+        let loginmode = $("#loginmode").data("loginmode");
+        if(!loginmode) login();
+        if(loginmode == 1) register();
+        if(loginmode == 2) app();
+        //if(window.localStorage.token) window.location.href="/app";
+        function login(){
+            if(window.localStorage.token) return app();
+            if($(".app-mount-login").css("opacity") == "0") {$(".app-mount-login").css("opacity", "1");}
+            if($(".app-mount-register").css("opacity") == "1") {$(".app-mount-register").css("opacity", "0");}
+            if($(".app-mount-app").css("opacity") == "1") {$(".app-mount-app").css("opacity", "0");}
+
+            window.history.pushState({}, "", "login");
+            if(typeof socket !== "undefined") {if(socket.disconnect){socket.disconnect();}socket = undefined;delete socket;}
+            if(typeof logout !== "undefined") {logout = undefined;delete logout;}
+            $("#loginbtn").on("click", function(e){
+                e.preventDefault();
+                const email = $("input[name=\"email\"]").val();
+                const pwd = $("input[name=\"password\"]").val();
+                if(clickedTimes == 1) return;
+
+                superagent.post("/api/v1/login").send({email:email,password:pwd}).set('accept', 'json').end((err, res) => {
+                if(JSON.parse(res.text).message == "That account is banned"){
+                    clickedTimes = 1;
+                    let bane = document.createElement("p");
+                    bane.style.fontSize = "20px";
+                    bane.style.color = "red";
+                    bane.innerText = "Está conta está banida do Scorpio";
+                    //return $(".app-mount").appendChild(bane);
+                    return $(".app-mount-login").append(bane);
+                }
+                if(JSON.parse(res.text).message == "That account is desactivated by the user"){
+                    clickedTimes = 1;
+                    let bane = document.createElement("p");
+                    bane.style.fontSize = "20px";
+                    bane.style.color = "red";
+                    bane.innerText = "Está conta foi desativada pelo usuário";
+                    //return $(".app-mount").appendChild(bane);
+                    return $(".app-mount-login").append(bane);
+                }
+                    if(res.statusCode == 404){
+                        let bane = document.createElement("p");
+                        bane.style.fontSize = "20px";
+                        bane.style.color = "red";
+                        bane.innerText = "Não existe essa conta";
+                        //return $(".app-mount").appendChild(bane);
+                        return $(".app-mount-login").append(bane);
+                    }
+
+                    let token = JSON.parse(res.text);
+                    window.localStorage.setItem("token", token.user.token);
+                    app();
+                });
+            });
+        }
+        function register(){
+            if(window.localStorage.token) return app();
+            //if($("#app").style.opacity == "0") {$("#app").style.opacity="1";$(".app-mount-login").style.opacity="0";}
+            //if($("#app").css("opacity") == "0") {$("#app").css("opacity", "1");$(".app-mount-login").css("opacity", "0");}
+            if($(".app-mount-register").css("opacity") == "0"){$(".app-mount-register").css("opacity", "1");}
+            if($(".app-mount-login").css("opacity") == "1"){$(".app-mount-login").css("opacity", "0");}
+            if($(".app-mount-app").css("opacity") == "1") {$(".app-mount-app").css("opacity", "0");}
+            if(typeof socket !== "undefined") {if(socket.disconnect){socket.disconnect();}socket = undefined;delete socket;}
+            if(typeof logout !== "undefined") {logout = undefined;delete logout;}
+            window.history.pushState({}, "", "register");
+            if(typeof socket !== "undefined") {socket.disconnect();delete socket;}
+            superagent.get("/recaptchasitekey").end(function(err, res){
+                if(createdGoogleRecaptcha == 0){
+                    let element = document.createElement("div");
+                    element.className = "g-recaptcha";
+                    element.dataset.sitekey = res.text;
+                    //$("#register").appendChild(element);
+                    $("#register").append(element);
+                    let googleScript = document.createElement("script");
+                    googleScript.src="https://www.google.com/recaptcha/api.js";
+                    $(document.head).append(googleScript);
+                    createdGoogleRecaptcha=1;
+                }
+                $("#registerbtn").on("click", function(e){
+                e.preventDefault();
+
+                const name = $("input[name=\"username\"]").val();
+                const email = $("input[name=\"emaill\"]").val();
+                const pwd = $("input[name=\"passwordl\"]").val();
+                const captcha = $("#g-recaptcha-response").val();
+
+                superagent.post("/api/v1/register").send({name:name,email:email,captcha:captcha,password:pwd}).set('accept', 'json').end((err, res) => {
+                    if(res.statusCode == 400){
+                        function report(){
+                            let element = document.createElement("p");
+                            element.style.color = "red";
+                            element.className="error";
+                            if(JSON.parse(res.text).message == "Please select name"){element.innerText="Por favor coloque um nome de usuario";}
+                            if(JSON.parse(res.text).message == "Please select email"){element.innerText="Por favor coloque seu email";}
+                            if(JSON.parse(res.text).message == "Please select password"){element.innerText="Por favor coloque uma senha";}
+                            if(JSON.parse(res.text).message == "Please select captcha"){element.innerText="Por favor faça o captcha";}
+                            errorRequestClickRegister = 1;
+                            return $("#app").append(element);
+                        }
+                        report();
+                        if(errorRequestClickRegister){
+                            $(".error").remove();
+                            errorRequestClickRegister=0;
+                            return report();
+                        } else if(!errorRequestClickRegister){
+                            return report();
+                        };
+                    }
+                    let token = JSON.parse(res.text);
+                    window.localStorage.setItem("token", token.user.token);
+                    window.location.href="/app";
+                });
+            });
+        });
+    }
+    function app(){
+        if($(".app-mount-login").css("opacity") == "1") {$(".app-mount-login").css("opacity", "0");$("#app").css("opacity", "0");}
+        if($("#app").css("opacity") == "1") {$("#app").css("opacity", "0");$("#app").css("opacity", "0");}
+        if($("#app").css("opacity") == "0") {$("#app").css("opacity", "1");}
+        window.history.pushState({}, "", "app");
+        if(!window.localStorage.token) return login();
+        superagent.post("/api/v1/banned").send({token: window.localStorage.token}).end(function(err, res){
+            if(res.statusCode == 404){window.localStorage.clear();return login();}
+            if(JSON.parse(res.text).banned == true){window.localStorage.clear(); return login();}
+        });
+
+        logout = function(){
+            $("#app").css("opacity", "0");
+            window.localStorage.clear();
+            return login();
+        }
+
+        if(!window.localStorage.token) login();
+
+        socket = io.connect();
+
+        socket.on("error", err => {
+            if(err.logout == true) return logout();
+        });
+
+        socket.on("refresh", () => {window.location.reload()});
+        
+        socket.on("messageCreate", messageObj => {
+            if(debug == 1) console.log(messageObj);
+            let messageDoc = document.createElement("p");
+            messageDoc.innerHTML = `${messageObj.author}: ${messageObj.message}`;
+            $("#messages").append(messageDoc);
+            window.scrollTo(0,999999999);
+        });
+
+        /*($("#submitBtn").onclick = function(){
+            $("#messages").append(messageDoc);
+        });//*/
+
+        function sendMessage(){
+            let message = $("input[name=\"message\"]").val();
+            let token = window.localStorage.token;
+
+            if(!token) return login();
+            if(!message) return;
+
+            if(debug == 1) console.log({token: token, message: message});
+            $("input[name=\"message\"]").val("");
+            socket.emit("messageForServer", {token: token, message: message});
+        }
+
+        /*$("#submitBtn").on("click", function(e){
+            e.preventDefault();
+
+            sendMessage();
+        });*/
+
+        window.addEventListener("keydown", (e) => {
+            if(e.key == "Enter") sendMessage();
+        });
+    }
+    </script>
+  </body>
+</html>
