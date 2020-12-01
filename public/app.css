@@ -1,0 +1,47 @@
+
+body {
+    background-color: rgb(36, 36, 36);
+    color: white;
+}
+
+#app-mount-app {
+    color: white;
+    margin-left: 600px;
+    flex-direction: column;
+}
+
+#msgtxtdiv {
+    position: relative;
+    border-radius: 5px;
+}
+
+#msgtextdiv{
+    position: fixed;
+    bottom: 0;
+    width: 22%;
+    background-color: rgb(211, 211, 211);
+}
+
+#msgtextbtn{
+    width: 10px;
+    height: 24px;
+    text-align: center;
+    color: grey;
+}
+#msgtextbtn{
+    color: grey;
+}
+
+div.stylize {
+    background-color: rgba(255, 255, 255, 0.212);
+    margin-left: 650px;
+    width: 420px;
+    height: 40px;
+}
+
+#messages{
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: fixed;
+    height: 670px;
+}

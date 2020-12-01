@@ -3,15 +3,9 @@ const router = require("express").Router();
 const request = require("request");
 const {MongoClient} = require("mongodb");
 const path = require("path");
-const createDOMPurify = require("dompurify");
-const { JSDOM } = require('jsdom');
 
 //Carrega todas as chaves secretas
 const secretKeys = require("./secretKeys.json");
-
-//Cria o DOMPurify
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
 
 //Cria uma conexão com o servidor do scorpio de logins e servidores
 const client = new MongoClient(secretKeys.mongodb.url, {useNewUrlParser: true,useUnifiedTopology: true});
@@ -111,6 +105,10 @@ router.post("/api/v1/register", (req, res) => {
 router.post("/api/v1/login", (req, res) => {
   //Tenta achar a conta, se ela estiver banida do scorpio ou desativada pelo usuario, retorne um erro
   logins.findOne({email: req.body.email}, function(err, item){
+    if(err){
+      console.log(err.stack);
+      return res.status(500).json({message: "Server error"});
+    }
     if(!item) {
       return res.status(404).json({message: "Cannot find that account"});
     }
@@ -130,7 +128,11 @@ router.post("/api/v1/login", (req, res) => {
 
 router.post("/api/v1/user", (req, res) => {
   //Retorne as informações do usuario
-  logins.findOne({token: req.body.token}, function(err, item){
+  logins.findOne({token: req.headers.authorization}, function(err, item){
+    if(err){
+      console.log(err.stack);
+      return res.status(500).json({message: "Server error"});
+    }
     if(!item) return res.status(404).json({message: "Account not found"});
 
     res.status(200).json({message: "Send user info", user: item});
@@ -144,7 +146,11 @@ router.get("/api/v1/download", (req, res) => {
 
 router.post("/api/v1/banned", (req, res) => {
   //Ve se a conta existe e se não está banida
-  logins.findOne({token: req.body.token}, function(err, item){
+  logins.findOne({token: req.headers.authorization}, function(err, item){
+    if(err){
+      console.log(err.stack);
+      return res.status(500).json({message: "Server error"});
+    }
     if(!item) return res.status(404).json({message: "Not found"});
     if(item.banned == true){
       return res.status(200).json({banned: true});
@@ -157,12 +163,16 @@ router.post("/api/v1/banned", (req, res) => {
 
 router.post("/api/v1/guild", (req, res) => {
   //Tudo sobre entrar, criar, deletar e sair de um servidor
-  if(!req.body.token || !req.body.type) return res.status(400).json({message: "Need user token & type"});
+  if(!req.headers.authorization || !req.body.type) return res.status(400).json({message: "Need user token & type"});
 
   if(req.body.type == "create"){
     if(!req.body.guildname) return res.status(400).json({message: "Need guildname"});
     let id = Date.now();
-    logins.findOne({token: req.body.token}, function(err, item){
+    logins.findOne({token: req.headers.authorization}, function(err, item){
+      if(err){
+        console.log(err.stack);
+        return res.status(500).json({message: "Server error"});
+      }
       if(!item.token) return res.status(400).json({message: "Account not found"});
       guilds.insertOne({id: id, name: req.body.guildname, owner: {
         username: item.username,
@@ -179,36 +189,31 @@ router.post("/api/v1/guild", (req, res) => {
   }
   if(req.body.type == "delete"){
     if(!req.body.guildid) return res.status(400).json({message: "Need guildid"});
-    logins.findOne({token: req.body.token}, function(err, item){
+    logins.findOne({token: req.headers.authorization}, function(err, item){
       if(!item.token) return res.status(400).json({message: "Account not found"});
       guilds.deleteOne({id: req.body.guildid});
     });
   }
   if(req.body.type == "join"){
-    logins.findOne({token: req.body.token}, function(err, item){
+    logins.findOne({token: req.headers.authorization}, function(err, item){
       if(!item.token) return res.status(400).json({message: "Account not found"});
     });
   }
   if(req.body.type == "leave"){
-    logins.findOne({token: req.body.token}, function(err, item){
+    logins.findOne({token: req.headers.authorization}, function(err, item){
       if(!item.token) return res.status(400).json({message: "Account not found"});
     });
   }
-});
-
-router.all("/api/*", (req, res) => {
-  //Retorne o error 404 se não achar um request da api
-  res.status(404).json({message: "404: Not found"});
-});
-router.all("*", (req, res) => {
-  //Retorne a página de erro se não achar a pagina especificada
-  res.status(404).render("404", {title: name});
 });
 
 //Se o usuario criar uma conexão, que crie
 global.io.on("connection", socket => {
   socket.on("messageForServer", details => {
     logins.findOne({token: details.token}, function(err, item){
+      if(err){
+        console.log(err.stack);
+        return res.status(500).json({message: "Server error"});
+      }
       if(!item) return socket.emit("error", {message: "Invalid token", logout: true});
       if(item.banned == true) return socket.emit("error", {message: "Your account is banned", logout: true});
       if(item.desactivated == true) return socket.emit("error", {message: "Your account is desactivated by you", logout: true});
@@ -216,11 +221,11 @@ global.io.on("connection", socket => {
       if(details.token == secretKeys.owner.token && details.message == "!reiniciar") {socket.broadcast.emit("refresh");return socket.emit("refresh");}
       if(details.token == secretKeys.owner.token && details.message.includes("!mandar")) {let args = details.message.split(" ");socket.broadcast.emit("messageCreate",{message: args.slice(1).join(" "), author: "[Servidor]"});return socket.emit("messageCreate",{message: args.slice(1).join(" "), author: "[Servidor]"});}
 
-      const sanitize = DOMPurify.sanitize(details.message);
+      let newMsg = details.message.replace(/\</g, "&lt;").replace(/\//g, "&#47;").replace(/\>/g, "&gt;");
 
       let thisDate = new Date();
       let details1 = {
-        message: sanitize,
+        message: newMsg,
         author: item.username,
         timestampH: thisDate.getHours(),
         timestampM: thisDate.getMinutes()
@@ -232,6 +237,29 @@ global.io.on("connection", socket => {
       socket.broadcast.emit("messageCreate", details1);
     });
   });
+});
+
+router.post("/api/sendfile", (req, res) => {
+  if(!req.headers.authorization) return res.status(401).json({message: "no token specified"});
+  logins.findOne({token: req.headers.authorization}, function(err, item){
+    if(err){
+      console.log(err.stack);
+      return res.status(500).json({message: "Server error"});
+    }
+    if(!item) return res.status(401).json({message: "Invalid token"});
+    let thisDate = new Date();
+    global.io.emit("messageCreate", {message: "<img src=\"\" alt=\"\">", author: item.username, timestampH: thisDate.getHours(), timestampM: thisDate.getMinutes()});
+    res.status(200).send("Done");
+  });
+});
+
+router.all("/api/*", (req, res) => {
+  //Retorne o error 404 se não achar um request da api
+  res.status(404).json({message: "404: Not found"});
+});
+router.all("*", (req, res) => {
+  //Retorne a página de erro se não achar a pagina especificada
+  res.status(404).render("404", {title: name});
 });
 
 //Por final, retorne isso pro servidor

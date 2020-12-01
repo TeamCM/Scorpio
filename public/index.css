@@ -4,6 +4,7 @@ html,body{
     margin-right: 0;
     height: 100%;
     /*overflow: hidden;*/
+    overflow-x: hidden;
 }
 
 a{
@@ -25,10 +26,4 @@ a{
     transform: translate(151%,15%);
     width: 200px;
     height: 200px;
-}
-
-#app-mount-app {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
 }

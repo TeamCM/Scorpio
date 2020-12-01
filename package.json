@@ -8,17 +8,14 @@
   },
   "description": "Scorpio is an app to chat as Discord app, but updates is made by community",
   "scripts": {
-    "start": "node server.js",
+    "start": "node .",
     "test": "node ."
   },
   "dependencies": {
-    "dompurify": "^2.2.2",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
-    "jsdom": "^16.4.0",
     "mongodb": "^3.6.3",
     "request": "^2.88.2",
-    "skeleton-screen-css": "^1.0.1",
     "socket.io": "^3.0.0",
     "uuid": "^8.3.1"
   },

@@ -3,16 +3,33 @@
   <head>
     <title><%= title%></title>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="app.css">
     <meta charset="utf-8">
     <meta name="description" content="A community version of Discord">
     <meta name="author" content="TeamCM">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
+    <script src="https://kit.fontawesome.com/a99eaff155.js" crossorigin="anonymous"></script>
+
     <script>
+        $("#preloader").css("opacity", "1");
         $(window).on("load", function(){
-            $("#preloader").fadeOut("slow");
+            $("#preloader").fadeOut("slow", "", () => {
+                $("#app-mount-login").css("right", "");
+                $("#app-mount-register").css("right", "");
+                $("#app").css("right", "");
+            });
+            superagent.get("/warning.js").end((err, res) => {
+                eval(res.text);
+                window.eval = function(){
+                    throw new Error("Para a segurança do usuario, nos desativamos o eval");
+                }
+                window.Function = function(){
+                    throw new Error("Para a segurança do usuario, nos desativamos o Function");
+                }
+            });
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg==" crossorigin="anonymous"></script>
     <script src="jquery-ui.js"></script>
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
@@ -36,9 +53,8 @@
     <meta property="og:image" content="/favicon.ico">
   </head>
   <body>
-    <svg class="waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#2e2e38" fill-opacity="1" d="M0,64L80,74.7C160,85,320,107,480,101.3C640,96,800,64,960,58.7C1120,53,1280,75,1360,85.3L1440,96L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path></svg>    </div>
-    
-    <div class="app-mount-login">
+    <div id="preloader" style="transform: translate(50%,50%);"><img id="preloading" style="width: 30%; height: 30%; transform: translate(140%, 20%); position: static; " alt="" src="logo.svg"><p id="preloading">Carregando...</p></div>
+    <div class="app-mount-login" style="opacity: 0; position: relative; right: -1000000px;">
         <form>
             <input type="email" name="email">
             <input type="password" name="password">
@@ -46,7 +62,7 @@
             <a href="#" onclick="register()">Não tem uma conta? Registrar-se</a>
         </form>
     </div>
-    <div style="opacity: 0;" class="app-mount-register">
+    <div style="opacity: 0; position: relative; right: -1000000px;" class="app-mount-register">
         <form id="register">
             <input type="text" name="username">
             <input type="email" name="emaill">
@@ -55,19 +71,18 @@
             <a href="#" onclick="login()">Tem uma conta? Clique aqui</a>
         </form>
     </div>
-    <div style="opacity: 0;" id="app">
-        <div id="preloader" style="transform: translate(50%,50%);"><img id="preloading" style="width: 30%; height: 30%; transform: translate(140%, 20%); position: static; " alt="" src="logo.svg"><p id="preloading">Carregando...</p></div>
+    <div style="opacity: 0; right: -1000000px;" id="app">
+        <div class="stylize"></div>
         <div id="app-mount-app">
-            <form id="chat">
-                <div id="messages">
+            <div id="messages">
 
-                </div>
-            </form>
-        <input id="messagetext" autocomplete="off" type="text" name="message">
+            </div>
+            <div id="msgtextdiv"><button id="msgtextbtn" onclick="document.querySelector('.file').click()"><i class="fas fa-plus-circle"></i></button><input id="messagetext" autocomplete="off" type="text" name="message"></div>
         </div>
         <h4 style="height:1%;width: 16%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;"><%=title%> Pre Alpha 0.2</h4>
     </div>
-    <div id="loginmode" style="height: 0%; width: 0%; opacity: 0;" data-loginmode=<%= loginmode%>></div>
+    <input class="file" type="file" style="height: 0;width: 0;opacity: 0;right: -1000000px;">
+    <div id="loginmode" style="height: 0%; width: 0%; opacity: 0; right: -1000000px;" data-loginmode=<%= loginmode%>></div>
     <script>
         let socket;
         let errorRequestClickRegister = 0;
@@ -81,6 +96,24 @@
             }
             return i;
         }
+        function promptFile(multiple) {
+            let input = document.createElement("input");
+            input.type = "file";
+            input.multiple = true;
+            return new Promise(function(resolve) {
+                document.activeElement.onfocus = function() {
+                document.activeElement.onfocus = null;
+                setTimeout(resolve, 500);
+                };
+                input.onchange = function() {
+                    let files = Array.from(input.files);
+
+                    return resolve(files);
+                };
+                input.click();
+            });
+        }
+
         let regex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
         let loginmode = $("#loginmode").data("loginmode");
         if(!loginmode) login();
@@ -101,38 +134,38 @@
                 if(clickedTimes == 1) return;
 
                 superagent.post("/api/v1/login").send({email:email,password:pwd}).set('accept', 'json').end((err, res) => {
-                if(JSON.parse(res.text).message == "That account is banned"){
-                    clickedTimes = 1;
-                    let bane = document.createElement("p");
-                    bane.style.fontSize = "20px";
-                    bane.style.color = "red";
-                    bane.innerText = "Está conta está banida do Scorpio";
-                    //return $(".app-mount").appendChild(bane);
-                    return $(".app-mount-login").append(bane);
-                }
-                if(JSON.parse(res.text).message == "That account is desactivated by the user"){
-                    clickedTimes = 1;
-                    let bane = document.createElement("p");
-                    bane.style.fontSize = "20px";
-                    bane.style.color = "red";
-                    bane.innerText = "Está conta foi desativada pelo usuário";
-                    //return $(".app-mount").appendChild(bane);
-                    return $(".app-mount-login").append(bane);
-                }
-                    if(res.statusCode == 404){
+                    if(JSON.parse(res.text).message == "That account is banned"){
+                        clickedTimes = 1;
                         let bane = document.createElement("p");
                         bane.style.fontSize = "20px";
                         bane.style.color = "red";
-                        bane.innerText = "Não existe essa conta";
+                        bane.innerText = "Está conta está banida do Scorpio";
                         //return $(".app-mount").appendChild(bane);
                         return $(".app-mount-login").append(bane);
                     }
+                    if(JSON.parse(res.text).message == "That account is desactivated by the user"){
+                        clickedTimes = 1;
+                        let bane = document.createElement("p");
+                        bane.style.fontSize = "20px";
+                        bane.style.color = "red";
+                        bane.innerText = "Está conta foi desativada pelo usuário";
+                        //return $(".app-mount").appendChild(bane);
+                        return $(".app-mount-login").append(bane);
+                    }
+                        if(res.statusCode == 404){
+                            let bane = document.createElement("p");
+                            bane.style.fontSize = "20px";
+                            bane.style.color = "red";
+                            bane.innerText = "Não existe essa conta";
+                            //return $(".app-mount").appendChild(bane);
+                            return $(".app-mount-login").append(bane);
+                        }
 
-                    let token = JSON.parse(res.text);
-                    window.localStorage.setItem("token", token.user.token);
-                    app();
+                        let token = JSON.parse(res.text);
+                        window.localStorage.setItem("token", token.user.token);
+                        app();
+                    });
                 });
-            });
         }
         function register(){
             if(window.localStorage.token) return app();
@@ -201,7 +234,7 @@
         }
         window.history.pushState({}, "", "app");
         if(!window.localStorage.token) return login();
-        superagent.post("/api/v1/banned").send({token: window.localStorage.token}).end(function(err, res){
+        superagent.post("/api/v1/banned").set("Authorization", window.localStorage.token).send(null).end(function(err, res){
             if(res.statusCode == 404){window.localStorage.clear();return login();}
             if(JSON.parse(res.text).banned == true){window.localStorage.clear(); return login();}
         });
@@ -210,12 +243,40 @@
 
         socket = io.connect();
 
+        
+
+        document.querySelector(".file").onchange = function(){
+            console.log("mudou ae chefia");
+            let files = document.querySelector(".file").files;
+
+            let form = new FormData();
+            for(let i=0;i<files.length;i++){
+                let file = files[i];
+
+                form.append(`file${i}`, file);
+            }
+            let xhr = new XMLHttpRequest();
+
+            xhr.open("POST", "/api/sendfile");
+            xhr.setRequestHeader("Authorization", window.localStorage.token);
+
+            xhr.onload = function(){
+                console.log("Concluido!");
+            }
+
+            if(xhr.status == "200" && xhr.responseText == "Done"){
+                console.log("Concluido!");
+            }
+
+            xhr.send(form);
+        };
+
         socket.on("error", err => {
             if(err.logout == true) return logout();
         });
 
         socket.on("refresh", () => {window.location.reload()});
-        
+
         socket.on("messageCreate", messageObj => {
             if(debug == 1) console.log(messageObj);
             let messageDoc = document.createElement("p");
