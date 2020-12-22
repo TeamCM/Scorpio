@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title%></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="app.css">
+    <meta name="description" content="A community version of Discord">
+    <meta name="author" content="TeamCM">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
+
+    <script>
+        //$("#app").css("display", "none");
+        //$("#preloader").css("opacity", "1");
+        $(window).on("load", function(){
+            $("#preloader").fadeOut("slow", "", () => {
+                //$(".app-mount-login").css("display", "block");
+                //$(".app-mount-register").css("display", "block");
+                console.log("carregou");
+                setInterval(function(){
+                    if(isApp == 1){
+                        isApp = 0;
+                        console.log("carrego app");
+                        $("#app").fadeIn("fast", "", () => {
+                            console.log("termino");
+                            app();
+                        });
+                    }
+                }, 100);
+            });
+        });
+        superagent.get("/warning.js").end((err, res) => {
+            eval(res.text);
+            window.eval = function(){
+                throw new Error("Para a segurança do usuario, nos desativamos o eval");
+            }
+            window.Function = function(){
+                throw new Error("Para a segurança do usuario, nos desativamos a Function");
+            }
+        });
+        //document.querySelector("#preloader").style.opacity = "1";
+        /*window.onload = function(){
+            document.querySelector("#preloader").style.display = "none";
+            document.querySelector(".app-mount-login").style.right = "";
+            document.querySelector(".app-mount-register").style.right = "";
+            document.querySelector("#app").style.right = "";
+
+            superagent.get("/warning.js").end((err, res) => {
+                eval(res.text);
+                window.eval = function(){
+                    throw new Error("Para a segurança do usuario, nos desativamos o eval");
+                }
+                window.Function = function(){
+                    throw new Error("Para a segurança do usuario, nos desativamos o Function");
+                }
+            });
+        }*/
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg==" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/a99eaff155.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta property="og:image" content="/favicon.ico">
+  </head>
+  <body>
+    <div id="preloader" style="display:none;"><p id="preloading">Carregando...</p></div>
+    <div class="app-mount-login" style="display: none; position: relative;">
+        <form>
+            <input type="email" name="email">
+            <input type="password" name="password">
+            <button id="loginbtn">Logar</button>
+            <a href="#" onclick="$('.app-mount-login').fadeOut('fast', '', () => {$('.app-mount-register').fadeIn('fast', '', () => {register();})})">Não tem uma conta? Registrar-se</a>
+        </form>
+    </div>
+    <div style="display: none; position: relative;" class="app-mount-register">
+        <form id="register">
+            <input type="text" name="username">
+            <input type="email" name="emaill">
+            <input type="password" name="passwordl">
+            <button id="registerbtn">Registrar-se</button>
+            <a href="#" onclick="$('.app-mount-register').fadeOut('fast', '', () => {$('.app-mount-login').fadeIn('fast', '', () => {login();});})">Tem uma conta? Clique aqui</a>
+        </form>
+    </div>
+    <div style="display: none;" id="app">
+        <!--<div class="stylize"></div>-->
+        <div id="rightclick">
+        </div>
+        <div id="guildlist"></div>
+        <div id="app-mount-app">
+            <div id="messages"></div>
+            <div id="msgtextdiv"><button id="msgtextbtn" onclick="document.querySelector('.file').click()"><i class="fas fa-plus-circle"></i></button><input id="messagetext" autocomplete="off" type="text" name="message"></div>
+        </div>
+        <h4 style="height:1%;width: 16%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;"><%=title%> Pre Alpha 0.2</h4>
+    </div>
+    <input class="file" type="file" style="display:none;">
+    <div id="loginmode" style="display:none;" data-loginmode=<%= loginmode%>></div>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "Scorpio",
+  "version": "0.0.1",
+  "main": "server.js",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/TeamCM/Scorpio"
+  },
+  "description": "Scorpio is an app to chat as Discord app, but updates is made by community",
+  "scripts": {
+    "start": "node .",
+    "test": "node ."
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "mongodb": "^3.6.3",
+    "request": "^2.88.2",
+    "socket.io": "^3.0.0",
+    "uuid": "^8.3.1"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "TeamCM",
+    "email": "theteamcm321@gmail.com"
+  },
+  "publisher": "TeamCM",
+  "bugs": {
+    "url": "https://github.com/TeamCM/Scorpio/issues",
+    "email": "theteamcm321@gmail.com"
+  }
+}

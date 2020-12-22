@@ -1,0 +1,31 @@
+html,body{
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+    height: 100%;
+    overflow: hidden;
+    /*overflow-x: hidden;*/
+}
+
+a{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#preloader{
+    position: relative;
+    width: 300px;
+    top: 50%;
+    margin: auto;
+}
+    
+#preloading{
+    text-align: center;
+    font-size: 20px;
+}
+
+/*#scorpioLogo{
+    transform: translate(151%,15%);
+    width: 200px;
+    height: 200px;
+}*/
