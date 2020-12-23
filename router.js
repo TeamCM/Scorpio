@@ -7,7 +7,7 @@ const path = require("path");
 const chalk = require("chalk");
 
 //Carrega todas as chaves secretas
-const secretKeys = require("./secretKeys.json");
+const secretKeys = require("./secretKeys.js");
 
 //Cria uma conexão com o servidor do scorpio de logins e servidores
 
