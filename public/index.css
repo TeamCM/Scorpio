@@ -1,0 +1,15 @@
+html,body{
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+    height: 100%;
+    overflow: hidden;
+    /*overflow-x: hidden;*/
+    /*overflow: hidden;*/
+    overflow-x: hidden;
+}
+
+a{
+    text-decoration: none;
+    cursor: pointer;
+}

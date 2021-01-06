@@ -1,0 +1,113 @@
+body {
+    background-color: rgb(36, 36, 36);
+    color: white;
+}
+
+#preloader{
+    position: relative;
+    width: 300px;
+    top: 50%;
+    margin: auto;
+}
+    
+#preloading{
+    text-align: center;
+    font-size: 20px;
+}
+
+#scorpio-logo{
+    transform: translate(100%,0);
+}
+
+#app-mount-app {
+    color: white;
+    margin-left: 600px;
+    flex-direction: column;
+}
+
+/*#msgtxtdiv {
+    position: relative;
+    border-radius: 5px;
+}/**/
+
+#msgtextdiv{
+    position: fixed;
+    bottom: 0;
+    width: 10%;
+    background-color: rgb(211, 211, 211);
+}
+
+div.stylize {
+    background-color: rgba(255, 255, 255, 0.212);
+    margin-left: 650px;
+    width: 420px;
+    height: 40px;
+}
+
+#messages{
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: fixed;
+    height: 670px;
+}
+
+#guildlist{
+    left: 1;
+    width: 60px;
+}
+
+#guildlist #dm{
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    border: 0;
+}
+
+#guildlist #join-server{
+    font-size: 20px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    border: 0;
+}
+
+.btn_special{
+    background-color: rgba(128, 128, 128, 0.356);
+    border-radius: 50%;
+    transition: 0.1s linear;
+}
+.btn_generic{
+    background-color: rgba(128, 128, 128, 0.356);
+    color: rgba(0, 204, 255, 0.705);
+    border-radius: 50%;
+    transition: 0.1s linear;
+}
+
+#guildlist #dm:hover{
+    background-color:rgba(0, 255, 76, 0.74);
+    border-radius: 20%;
+    transition: 0.1s linear;
+}
+
+#guildlist #join-server:hover{
+    color:rgba(255, 0, 0, 0.103);
+    background-color:rgba(0, 204, 255, 0.705);
+    border-radius: 20%;
+
+    transition: 0.1s linear;
+}
+
+.clicked_generic{
+    color:rgba(255, 0, 0, 0.103);
+    background-color:rgba(0, 204, 255, 0.705);
+    border-radius: 20%;
+
+    transition: 0.1s linear;
+}
+.clicked_special{
+    background-color:rgba(0, 255, 76, 0.74);
+    border-radius: 20%;
+    transition: 0.1s linear;
+
+    transition: 0.1s linear;
+}
