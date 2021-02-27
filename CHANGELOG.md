@@ -5,12 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9]
+
+### Changed
+- Make preloader disappears when connected into the websocket server
+- Socket.IO will manualy reconnect every 3 seconds if its got disconnected (if fails more than 5 times, it will refresh the page)
+- Router.JS is now in the server folder
+
+### Removed
+- Unecessary comments in app.js
+
+### Added
+- deleteAcc(pwd) function
+- Errors if some lib is not loaded
+
+### Fixed
+- Socket.IO Not triggering event reconnect, reconnect_attempt, reconnecting (See changed to see the manually reconection)
+
 ## [0.0.8]
 
 ### Added
 - Now the version is the now "n-n-n" not more "n-n" (n is a number)
 - DM and Friends Viewer (DM is Direct Message) (Not complete)
 - Added Join Server button (Not complete)
+
 
 ## [0.0.7]
 

@@ -19,19 +19,9 @@
                 $("#app-mount-register").css("right", "");
                 $("#app").css("right", "");
             });
-            superagent.get("/warning.js").end((err, res) => {
-                eval(res.text);
-                window.eval = function(){
-                    throw new Error("Para a segurança do usuario, nos desativamos o eval");
-                }
-                window.Function = function(){
-                    throw new Error("Para a segurança do usuario, nos desativamos o Function");
-                }
-            });
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg==" crossorigin="anonymous"></script>
-    <script src="jquery-ui.js"></script>
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
@@ -46,11 +36,12 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileColor" content="#2b2b2b">
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#2b2b2b">
     <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta property="og:image" content="/favicon.ico">
+    <script src="security.js"></script>
   </head>
   <body>
     <div id="preloader" style="transform: translate(50%,50%);"><img id="preloading" style="width: 30%; height: 30%; transform: translate(140%, 20%); position: static; " alt="" src="logo.svg"><p id="preloading">Carregando...</p></div>

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="description" content="A community version of Discord">
-    <meta name="author" content="TeamCM">
-    <title>Error 404 - <%= title%></title>
+  <head>
+    <title>Regras - <%= title%></title>
     <link rel="stylesheet" href="static/index.css">
+    <script src="static/security.js"></script>
+
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
@@ -25,9 +24,31 @@
     <meta name="theme-color" content="#2b2b2b">
     <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta property="og:image" content="/favicon.ico">
-    <script src="static/security.js"></script>
-</head>
-<body>
-    <h2>404</h2>
-</body>
+    <style>
+      #head nav{
+          background-color: #2b2b2b;
+      }/**/
+      
+      a{
+          color: #ffffff;
+      }
+  </style>
+  </head>
+  <body>
+    <header>
+      <div id="head">
+          <nav>
+              <a href="/">
+                  <img src="android-icon-48x48.png" alt="logo">
+              </a>
+              <a href="/download">Baixar</a>
+              <a href="/rules">Regras</a>
+              <a href="/guidelines">Diretrizes da Comunidade</a>
+          </nav>
+      </div>
+  </header>
+  <div id="guidelines">
+    
+  </div>
+  </body>
 </html>

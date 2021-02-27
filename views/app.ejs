@@ -1,62 +1,80 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
     <title><%= title%></title>
     <meta charset="utf-8">
     <meta name="description" content="A community version of Discord">
     <meta name="author" content="TeamCM">
-    <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="app.css">
+
+    <link rel="stylesheet" href="static/index.css">
+    <link rel="stylesheet" href="static/app.css">
+
+    <!-- For electron. See https://stackoverflow.com/questions/32621988/electron-jquery-is-not-defined -->
+    <script>if (typeof module === 'object') {window.tempModule = module;window.module = module; module = undefined;}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
-    <script src="warning.js"></script>
+    <script src="static/security.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#2b2b2b">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#2b2b2b">
+    <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta property="og:image" content="/favicon.ico">
     <script>
-        //$("#app").css("display", "none");
+        //Vo bloquea Safari (pq n sei como que é no safari)
+        window.addEventListener("load", function(){
+            if(Number(navigator.userAgent.indexOf("Trident")) != -1){  // Internet Explorer
+                document.body.innerHTML = "Seu navegador é incompativel, por favor use outro navegador.";
+            }
+        });
+        window.addEventListener("load", function(){
+            let userAgent = navigator.userAgent.toLowerCase();
+            let safari = /webkit/.test(userAgent) && !/chrome/.test(userAgent); // Safari
+            //let opera = (navigator.userAgent.match(/Opera|OPR\//) ? true : false); // Opera
+
+            if(safari && !window.localStorage.ignorewarns){
+                document.body.innerHTML = "Não testamos nesse navegador, por favor use outro navegador, para burlar essa proteção por favor clique com o botão direito, inspecionar elemento, depois clique em console, digite: window.localStorage.setItem(\"ignorewarns\", \"true\"); e de enter";
+            } /*else if(opera && !window.localStorage.ignorewarns){
+                document.body.innerHTML = "Esse navegador tem bugs no Scorpio, por favor use outro navegador, para burlar essa proteção por favor clique com o botão direito, inspecionar elemento, depois clique em console, digite: window.localStorage.setItem(\"ignorewarns\", \"true\"); e de enter";
+            }*/
+        });
+    </script>
+    <script>
+        if(typeof $ != "function"){
+            document.writeln("Habilite JQuery pra entrar no Scorpio");
+        }
         $("#preloader").css("display", "block");
         $(window).on("load", function(){
             if(!window.localStorage.token && isApp == 1) {$("#preloader").css("display", "none");return login();}
-            $("#preloader").fadeOut("slow", "", () => {
-                //$(".app-mount-login").css("display", "block");
-                //$(".app-mount-register").css("display", "block");
-                console.log("[Scorpio Debug] carregou");
-                setInterval(function(){
-                    if(isApp == 1){
-                        isApp = 0;
-                        console.log("[Scorpio Debug] carrego app");
-                        $("#app").fadeIn("fast", "", () => {
-                            console.log("[Scorpio Debug] termino");
-                            app();
-                        });
-                    }
-                }, 100);
-            });
+            const app_check = setInterval(function(){
+                if(isApp == 1){
+                    isApp = 0;
+                    app();
+                    clearInterval(app_check);
+                }
+            }, 100);
+            
         });
-        window.eval = function(){
-            throw new Error("Para a segurança do usuario, nos desativamos o eval");
-        }
-        window.Function = function(){
-            throw new Error("Para a segurança do usuario, nos desativamos a Function");
-        }
-        //document.querySelector("#preloader").style.opacity = "1";
-        /*window.onload = function(){
-            document.querySelector("#preloader").style.display = "none";
-            document.querySelector(".app-mount-login").style.right = "";
-            document.querySelector(".app-mount-register").style.right = "";
-            document.querySelector("#app").style.right = "";
-
-            superagent.get("/warning.js").end((err, res) => {
-                eval(res.text);
-                window.eval = function(){
-                    throw new Error("Para a segurança do usuario, nos desativamos o eval");
-                }
-                window.Function = function(){
-                    throw new Error("Para a segurança do usuario, nos desativamos o Function");
-                }
-            });
-        }*/
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg==" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/a99eaff155.js" crossorigin="anonymous"></script>
+    <!-- For electron see: https://stackoverflow.com/questions/32621988/electron-jquery-is-not-defined -->
+    <script>if (window.module) {window.module = window.tempModule;module = window.module;}</script>
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
@@ -78,7 +96,25 @@
     <meta property="og:image" content="/favicon.ico">
   </head>
   <body>
-    <div id="preloader" style="display:none;"><img id="scorpio-logo" src="favicon-96x96.png" alt="logo"><p id="preloading">Carregando...</p></div>
+    <header>
+        <div id="warning" style="transform:translateX(43%);">
+            <p id="reco1" style="display:none;position:fixed;">Reconectando...</p>
+            <p id="reco2" style="display:none;position:fixed;">Reconectado</p>
+        </div>
+    </header>
+    <div id="preloader" style="display:none;">
+        <img id="scorpio-logo" src="favicon-96x96.png" alt="logo">
+        <br><br>
+        <div id="bar"></div>
+        <p id="preloading">Carregando...</p>
+    </div>
+    <script>
+        /*$(window).on("load", function(){
+            setTimeout(function(){
+                $("#bar").css("width", "40%");
+            }, 100);
+        });*/
+    </script>
     <div class="app-mount-login" style="display: none; position: relative;">
         <form>
             <input type="email" name="email">
@@ -96,32 +132,45 @@
             <a href="#" onclick="$('.app-mount-register').fadeOut('fast', '', () => {$('.app-mount-login').fadeIn('fast', '', () => {login();});})">Tem uma conta? Clique aqui</a>
         </form>
     </div>
-    <div style="display: none;" id="app">
-        <!--<div class="stylize"></div>-->
-        <div id="rightclick">
+    <div style="display:none;" id="app">
+        <!--<div>
+            <p id="text-upper"><%= title%></p>
+            <button id="close" onclick=""><i class="fas fa-times"></button>
+        </div>-->
+        <div id="settings-menu" style="display:none;">
+
         </div>
-        <br>
-        <div id="guildlist">
-            <button id="dm" class="btn_special"><img src="android-icon-36x36.png"  alt="logo"></button>
-            <br>
+        <div id="main">
+            <div id="guildlist">
+            <button id="dm" class="btn_special" onclick="$('#dm').addClass('clicked_special');$('#app-mount-app').css('display', 'none');$('#dm-menu').css('display', 'block');"><img src="android-icon-36x36.png" alt="logo"></button>
+            <br><br>
             <div id="guilds">
                 
             </div>
             <br>
             <button id="join-server" class="btn_generic" onclick="$('#guild-menu').fadeIn('fast', '');$('#join-server').addClass('clicked_generic')"><i class="fas fa-plus"></i></button>
+            </div>
+            <div id="user-info">
+                <p id="user"></p>
+                <button id="user-settings"><i class="fas fa-user-cog"></i></button>
+            </div>
+            <div id="guild-menu" style="display:none;position:fixed;">
+                <button id="create">Criar um servidor</button>
+                <button id="join">Entrar em um servidor</button>
+                <button id="close-guildmenu" onclick="$('#guild-menu').fadeOut('fast', '');$('#join-server').removeClass('clicked_generic')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="dm-menu" style="display:none;">
+                <div id="dms"></div>
+                <div id="things"></div>
+            </div>
+            <div id="app-mount-app">
+                <div id="messages"></div>
+                <div id="msgtextdiv"></button><input id="messagetext" autocomplete="off" type="text" name="message"></div>
+            </div>
+            <p class="rainbow" style="position: fixed;right: 0;bottom: 0;font-size: 150%;margin-right: 280px;margin-top: 0px;margin-bottom: 10px;"><%=title%></p><h4 style="height:1%;width: 19%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;">Pre Alpha 0.0.9</h4>
         </div>
-        <div id="guild-menu" style="display:none;">
-            <button>Criar um servidor</button>
-            <button>Entrar em um servidor</button>
-            <button onclick="$('#guild-menu').fadeOut('fast', '');$('#join-server').removeClass('clicked_generic')"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="app-mount-app">
-            <div id="messages" style="display:fixed;"></div>
-            <div id="msgtextdiv"></button><input id="messagetext" autocomplete="off" type="text" name="message"></div>
-        </div>
-        <h4 style="height:1%;width: 16%;color:grey;position: fixed;right: 0;bottom: 0;font-size: 150%;"><%=title%> Pre Alpha 0.8</h4>
     </div>
-    <div id="loginmode" style="display:none;" data-loginmode=<%= loginmode%>></div>
-    <script src="app.js"></script>
+    <div id="loginmode" style="display:none;" data-loginmode=<%= loginmode%> ></div>
+    <script src="static/app.js"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@
     <title><%= title%></title>
     <meta name="description" content="A community version of Discord">
     <meta name="author" content="TeamCM">
-    <link rel="stylesheet" href="download.css">
+    <link rel="stylesheet" href="static/index.css">
     <meta charset="utf-8">
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
@@ -20,13 +20,37 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileColor" content="#2b2b2b">
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#2b2b2b">
     <link id="favicon" rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta property="og:image" content="/favicon.ico">
+    <script src="static/security.js"></script>
   </head>
   <body>
+    <style>
+      #head nav{
+          background-color: #2b2b2b;
+      }/**/
+      
+      a{
+          color: #ffffff;
+      }
+  </style>
+  </head>
+  <body>
+    <header>
+      <div id="head">
+          <nav>
+              <a href="/">
+                  <img src="android-icon-48x48.png" alt="logo">
+              </a>
+              <a href="/download">Baixar</a>
+              <a href="/rules">Regras</a>
+              <a href="/guidelines">Diretrizes da Comunidade</a>
+          </nav>
+      </div>
+    </header>
     <div>
       <div id="download">
         

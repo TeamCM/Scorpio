@@ -1,6 +1,7 @@
 {
  "name": "Scorpio - A open source app to talk and do friends!",
  "short_name": "Scorpio",
+ "theme_color": "#2b2b2b",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",

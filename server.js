@@ -3,6 +3,8 @@ const http = require("http");
 const express = require("express");
 const app = express();
 
+app.disable("x-powered-by");
+
 const chalk = require("chalk");
 
 console.log(chalk.blue("[HTTP] Iniciando variaveis..."));
@@ -11,12 +13,16 @@ console.log(chalk.blue("[HTTP] Iniciando variaveis..."));
 const server = http.createServer(app);
 const io = require("socket.io")(server);
 
+global.star = `${chalk.blue("[Router]")}`;
+global.ok = `${chalk.green("[Router]")}`;
+global.error = `${chalk.red("[Router]")}`;
 global.io = io;
 
 //Registra a configuração do servidor
 app.set("views", "./views");
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static("icons"));
+app.use("/static", express.static("static"));
 
 //Manda o servidor usar o res.json() para a nossa API
 app.use(express.urlencoded({extended: false}));
@@ -24,7 +30,7 @@ app.use(express.json());
 
 console.log(chalk.blue("[HTTP] Iniciando o router..."));
 //Manda o servidor usar nossas rotas HTTP
-app.use(require("./router.js"));
+app.use(require("./server/router.js"));
 
 //Por final faça o servidor carregar na porta 80 (Padrão do HTTP) e ainda manda no terminal "servidor ta on"
 console.log(chalk.blue("[HTTP] Tentando escutar na porta 80..."));
